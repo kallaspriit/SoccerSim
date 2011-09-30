@@ -1,0 +1,14 @@
+WHAT?
+SoccerSim is a rather simple yet powerful autonomous computer-controlled simulator for robots whose purpose is to play football. Basically any sort of robot could be simulated, the example has a bot with four omniwheels, a dribbler for holding on to a ball, virtual coilgun and camera.
+
+HOW?
+Simulator is written entirely in Java. JBox2D, a Box2D Java port is used for accurate two dimensional physics. The simulation layer is completely seperated from rendering and GUI so one could simulate rounds without actually rendering anything very rapidly to see whether some changes to algorithms have made the robot better when played through many rounds.
+
+WHY?
+The simulator was created as an aid to develop our own robot for robotic football contest in Estonia called Robotex. While the default rules of the simulation match this competition, they can be changed easily.
+
+HOW TO USE IT?
+It should run pretty much out of the box, just create or import the project into your IDE and check existing robot implementation. Robots and controllers are pluggable so it's easy to create your own.
+
+I MADE SOMETHING COOL!
+Great, let me know and I'll add it to the library :)
