@@ -168,6 +168,10 @@ public class RamsesManualController implements KeyListener, MouseListener, StepL
 			}
 		}
 		
+		if (isKeyPressed(KeyEvent.VK_SPACE)) {
+			ramses.kick();
+		}
+		
 		float angle = (float)Math.atan2(xPower, yPower);
 		float power = Math.min(Math.abs(Math.abs(xPower) + Math.abs(yPower)), 1.0f);
 

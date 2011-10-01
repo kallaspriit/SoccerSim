@@ -10,4 +10,5 @@ public interface GameInfo {
 	public Robot getBlueRobot();
 	public Goal getYellowGoal();
 	public Goal getBlueGoal();
+	public Ball getBallById(int id);
 }

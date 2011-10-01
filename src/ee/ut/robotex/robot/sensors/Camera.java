@@ -35,14 +35,12 @@ public class Camera implements StepListener, Paintable {
 	protected List<GoalInfo> visibleGoals;
 	
 	public class BallInfo {
-		public float x;
-		public float y;
+		private int id;
 		public float distance;
 		public float angle;
 		
-		public BallInfo(float x, float y, float distance, float angle) {
-			this.x = x;
-			this.y = y;
+		public BallInfo(int id,float distance, float angle) {
+			this.id = id;
 			this.distance = distance;
 			this.angle = angle;
 		}
@@ -50,15 +48,11 @@ public class Camera implements StepListener, Paintable {
 	
 	public class GoalInfo {
 		public Simulation.Side side;
-		public float x;
-		public float y;
 		public float distance;
 		public float angle;
 		
-		public GoalInfo(Simulation.Side side, float x, float y, float distance, float angle) {
+		public GoalInfo(Simulation.Side side, float distance, float angle) {
 			this.side = side;
-			this.x = x;
-			this.y = y;
 			this.distance = distance;
 			this.angle = angle;
 		}
@@ -87,13 +81,13 @@ public class Camera implements StepListener, Paintable {
 		view.addPoint(0,  0);
 		
 		view.addPoint(
-			distance * (float)Math.cos((-angleOfView / 2.0f + angle) * Math.PI / 180.0f),
-			distance * (float)Math.sin((-angleOfView / 2.0f + angle) * Math.PI / 180.0f)
+			distance * (float)Math.cos((-angleOfView / 2.0f + angle - 90.0f) * Math.PI / 180.0f),
+			distance * (float)Math.sin((-angleOfView / 2.0f + angle - 90.0f) * Math.PI / 180.0f)
 		);
 		
 		view.addPoint(
-			distance * (float)Math.cos((angleOfView / 2.0f + angle) * Math.PI / 180.0f),
-			distance * (float)Math.sin((angleOfView / 2.0f + angle) * Math.PI / 180.0f)
+			distance * (float)Math.cos((angleOfView / 2.0f + angle - 90.0f) * Math.PI / 180.0f),
+			distance * (float)Math.sin((angleOfView / 2.0f + angle - 90.0f) * Math.PI / 180.0f)
 		);
 	}
 
@@ -108,41 +102,50 @@ public class Camera implements StepListener, Paintable {
 		// draw camera position arc
 		float arcRadius = 0.1f;
 		g.setColor(new Color(255, 255, 255, 100));
-		g.fill(new Arc2D.Float(-arcRadius + x, -arcRadius + y, arcRadius * 2.0f, arcRadius * 2.0f, -angleOfView / 2.0f - angle, angleOfView, Arc2D.PIE));
+		g.fill(new Arc2D.Float(-arcRadius + x, -arcRadius + y, arcRadius * 2.0f, arcRadius * 2.0f, -angleOfView / 2.0f - angle + 90.0f, angleOfView, Arc2D.PIE));
 		
 		// to display visible balls, we have to get back to global coordinates
 		Graphics2D g3 = (Graphics2D)g.create();
 		g3.rotate(-body.getAngle());
 		g3.translate(-body.getPosition().x, -body.getPosition().y);
 		
-		for (BallInfo ball : visibleBalls) {
+		for (BallInfo ballInfo : visibleBalls) {
+			Ball ball = game.getBallById(ballInfo.id);
+			
 			float radius = 0.075f;
 			
 			g3.setColor(new Color(255, 255, 255, 100));
-			g3.fill(new Ellipse2D.Float(ball.x - radius, ball.y - radius, radius * 2.0f, radius * 2.0f));
+			g3.fill(new Ellipse2D.Float(ball.getX() - radius, ball.getY() - radius, radius * 2.0f, radius * 2.0f));
 			
 			g3.setFont((new Font("Consolas", Font.PLAIN, 1)).deriveFont(0.1f));
 			g3.setColor(new Color(255, 255, 255));
 			g3.drawString(
-				Long.toString(Math.round(ball.distance * 100.0f)) + "cm / " + Long.toString(Math.round(ball.angle / Math.PI * 180.0f)) + "°",
-				ball.x,
-				ball.y - 0.1f
+				Long.toString(Math.round(ballInfo.distance * 100.0f)) + "cm / " + Long.toString(Math.round(ballInfo.angle / Math.PI * 180.0f)) + "°",
+				ball.getX(),
+				ball.getY() - 0.1f
 			);
 		}
-
-		for (GoalInfo goal : visibleGoals) {
+		for (GoalInfo goalInfo : visibleGoals) {
+			Goal goal = null;
+			
+			if (goalInfo.side == Simulation.Side.YELLOW) {
+				goal = game.getYellowGoal();
+			} else {
+				goal = game.getBlueGoal();
+			}
+			
 			float width = 0.33f;
 			float height = 0.78f;
 			
 			g3.setColor(new Color(255, 255, 255, 100));
-			g3.fill(new Rectangle2D.Float(goal.x - width / 2.0f, goal.y - height / 2.0f, width, height));
+			g3.fill(new Rectangle2D.Float(goal.getBody().getPosition().x - width / 2.0f, goal.getBody().getPosition().y - height / 2.0f, width, height));
 			
 			g3.setFont((new Font("Consolas", Font.PLAIN, 1)).deriveFont(0.1f));
 			g3.setColor(new Color(255, 255, 255));
 			g3.drawString(
-				Long.toString(Math.round(goal.distance * 100.0f)) + "cm / " + Long.toString(Math.round(goal.angle / Math.PI * 180.0f)) + "°",
-				goal.x,
-				goal.y - 0.2f
+				Long.toString(Math.round(goalInfo.distance * 100.0f)) + "cm / " + Long.toString(Math.round(goalInfo.angle / Math.PI * 180.0f)) + "°",
+				goal.getBody().getPosition().x,
+				goal.getBody().getPosition().y - 0.2f
 			);
 		}
 	}
@@ -176,7 +179,7 @@ public class Camera implements StepListener, Paintable {
 				float distance = MathUtils.distance(ballPos, cameraPos);
 				float angle = Vec2.dot(ballHeading, forwardVec);
 				
-				visibleBalls.add(new BallInfo(ball.getX(), ball.getY(), distance, angle));
+				visibleBalls.add(new BallInfo(ball.getId(), distance, angle));
 			}
 		}
 		
@@ -200,7 +203,7 @@ public class Camera implements StepListener, Paintable {
 				float distance = MathUtils.distance(ballPos, cameraPos);
 				float angle = Vec2.dot(ballHeading, forwardVec);
 				
-				visibleGoals.add(new GoalInfo(goal.getSide(), goal.getBody().getPosition().x, goal.getBody().getPosition().y, distance, angle));
+				visibleGoals.add(new GoalInfo(goal.getSide(), distance, angle));
 			}
 		}
 	}

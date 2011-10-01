@@ -8,17 +8,21 @@ import java.util.List;
 
 import org.jbox2d.dynamics.World;
 
-import ee.ut.robotex.robot.sensors.Camera;
 import ee.ut.robotex.renderer.Paintable;
 import ee.ut.robotex.renderer.Polygon2D;
 import ee.ut.robotex.robot.Robot;
+import ee.ut.robotex.robot.components.Coilgun;
+import ee.ut.robotex.robot.components.Dribbler;
 import ee.ut.robotex.robot.components.Wheel;
+import ee.ut.robotex.robot.sensors.Camera;
 import ee.ut.robotex.simulation.GameInfo;
 import ee.ut.robotex.simulation.StepListener;
 
 public class Ramses extends Robot {
 	private Polygon2D outline;
 	private Camera camera;
+	private Coilgun coilgun;
+	private Dribbler dribbler;
 	private Wheel wheelFL;
 	private Wheel wheelFR;
 	private Wheel wheelRL;
@@ -30,6 +34,14 @@ public class Ramses extends Robot {
 	private float cameraOffset = 0.1f;
 	private float cameraAOV = 120.0f;
 	private float cameraDistance = 8.5f;
+	private float coilgunOffset = -0.18f;
+	private float coilgunWidth = 0.18f;
+	private float coilgunRange = 0.04f;
+	private float coilgunStrength = 40.0f;
+	private float dribblerOffset = -0.18f;
+	private float dribblerWidth = 0.18f;
+	private float dribblerRange = 0.04f;
+	private float dribblerStrength = 3.0f;
 	private float radius = (edgeWidth + sideWidth) / 2.0f;
 	private float maxEngineTorque = 2.0f;
 	private float wheelRadius = 0.02f;
@@ -45,8 +57,10 @@ public class Ramses extends Robot {
 	
 	@Override
 	protected void setup() {
-		this.camera = new Camera(body, game, 0.0f, cameraOffset, -90.0f, cameraAOV, cameraDistance);
-		this.wheels = new ArrayList<Wheel>();
+		camera = new Camera(body, game, 0.0f, cameraOffset, 0.0f, cameraAOV, cameraDistance);
+		coilgun = new Coilgun(body, game, 0.0f, coilgunOffset, 0.0f, coilgunWidth, coilgunRange);
+		dribbler = new Dribbler(body, game, 0.0f, dribblerOffset, 0.0f, dribblerWidth, dribblerRange, dribblerStrength);
+		wheels = new ArrayList<Wheel>();
 		
 		// omni wheels simply have little lateral grip
 		wheelFL = new Wheel(body, -radius + wheelOffset, -radius + wheelOffset, 135.0f, maxEngineTorque, wheelRadius, lateralGrip);
@@ -88,6 +102,12 @@ public class Ramses extends Robot {
 		
 		Graphics2D g2 = (Graphics2D)g.create();
 		camera.paint(g2);
+		
+		g2 = (Graphics2D)g.create();
+		coilgun.paint(g2);
+		
+		g2 = (Graphics2D)g.create();
+		dribbler.paint(g2);
 	}
 
 	@Override
@@ -136,6 +156,8 @@ public class Ramses extends Robot {
 		}
 		
 		camera.stepBeforePhysics(dt);
+		coilgun.stepBeforePhysics(dt);
+		dribbler.stepBeforePhysics(dt);
 	}
 
 	public void setHeading(float heading) {
@@ -150,6 +172,10 @@ public class Ramses extends Robot {
 		this.yawRate = yawRate;
 	}
 	
+	public void kick() {
+		coilgun.kick(coilgunStrength);
+	}
+	
 	@Override
 	public void stepAfterPhysics(float dt) {
 		for (StepListener wheel : wheels) {
@@ -157,5 +183,7 @@ public class Ramses extends Robot {
 		}
 		
 		camera.stepAfterPhysics(dt);
+		coilgun.stepAfterPhysics(dt);
+		dribbler.stepAfterPhysics(dt);
 	}
 }

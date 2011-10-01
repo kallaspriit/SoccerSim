@@ -119,6 +119,16 @@ public class Simulation implements Runnable, GameInfo, StepListener, ContactList
 	public List<Ball> getBalls() {
 		return balls;
 	}
+	
+	public Ball getBallById(int id) {
+		for (Ball ball : balls) {
+			if (ball.getId() == id) {
+				return ball;
+			}
+		}
+		
+		return null;
+	}
 
 	@Override
 	public Robot getYellowRobot() {
