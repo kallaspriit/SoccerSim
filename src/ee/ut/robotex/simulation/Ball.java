@@ -17,8 +17,8 @@ public class Ball implements Paintable, StepListener {
 
 	private Body body;
 	private int id;
-	private float radius = 0.04267f;
-	private float density = 1.12909f; //<http://www.madsci.org/posts/archives/2004-08/1091747977.Ph.r.html
+	private float radius = 0.043f/2; // ... "diameetriga ligikaudu 43 mm"
+	private float density = (float) (0.046/(Math.PI*Math.pow(radius,2))); // ... "massiga ligikaudu 46g"
 	private float restitution = 0.5f;
 	private float friction = 0.3f;
 	private float angularDamping = 0.5f;
