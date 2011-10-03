@@ -15,6 +15,7 @@ import ee.ut.robotex.renderer.Paintable;
 
 public class Ball implements Paintable, StepListener {
 
+	private Body body;
 	private int id;
 	private float radius = 0.04267f;
 	private float density = 1.12909f; //<http://www.madsci.org/posts/archives/2004-08/1091747977.Ph.r.html
@@ -23,7 +24,7 @@ public class Ball implements Paintable, StepListener {
 	private float angularDamping = 0.5f;
 	private float linearDamping = 0.5f;
 	private static int instances = 0;
-	private Body body;
+	private boolean isActive = true;
 	
 	public Ball(World world, float x, float y) {
 		id = instances++;
@@ -66,12 +67,25 @@ public class Ball implements Paintable, StepListener {
 		return body.getPosition().y;
 	}
 	
+	public void deactivate() {
+		isActive = false;
+	}
+	
+	public boolean isActive() {
+		return isActive;
+	}
+	
 	public float distanceTo(float x, float y) {
 		return (float)Math.sqrt(Math.pow(this.getX() - x, 2) + Math.pow(this.getY() - y, 2));
 	}
 	
 	public void paint(Graphics2D g) {
-		g.setColor(new Color(225, 128, 0));
+		if (isActive) {
+			g.setColor(new Color(225, 128, 0));
+		} else {
+			g.setColor(new Color(128, 128, 128));
+		}
+		
 		g.fill(new Ellipse2D.Float(-radius, -radius, radius * 2.0f, radius * 2.0f));
 	}
 	

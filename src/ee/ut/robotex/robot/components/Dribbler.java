@@ -23,7 +23,8 @@ public class Dribbler implements StepListener, Paintable {
 	private float range;
 	private float strength = 1.0f;
 	private boolean active = true;
-	protected Polygon2D area;
+	private boolean gotBall = false;
+	private Polygon2D area;
 	
 	public Dribbler(Body body, GameInfo game, float x, float y, float angle, float width, float range, float strength) {
 		this.body = body;
@@ -55,6 +56,10 @@ public class Dribbler implements StepListener, Paintable {
 	public void setStrength(float strength) {
 		this.strength = strength;
 	}
+	
+	public boolean hasBall() {
+		return gotBall;
+	}
 
 	@Override
 	public void paint(Graphics2D g) {
@@ -67,6 +72,8 @@ public class Dribbler implements StepListener, Paintable {
 
 	@Override
 	public void stepBeforePhysics(float dt) {
+		gotBall = false;
+		
 		Polygon2D globalView = new Polygon2D();
 		float ballRadius = game.getBalls().get(0).getRadius();
 		
@@ -83,7 +90,7 @@ public class Dribbler implements StepListener, Paintable {
 		
 		for (Ball ball : game.getBalls()) {
 			if (globalView.contains(ball.getX(), ball.getY())) {
-				System.out.println("Dribbler sees #" + ball.getId());
+				//System.out.println("Dribbler sees #" + ball.getId());
 				
 				if (active) {
 					// no lateral force
@@ -96,6 +103,8 @@ public class Dribbler implements StepListener, Paintable {
 					
 					ball.getBody().applyForce(dribblerForce, ball.getBody().getPosition());
 				}
+				
+				gotBall = true;
 			}
 		}
 	}

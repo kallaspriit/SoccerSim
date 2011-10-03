@@ -1,5 +1,6 @@
 package ee.ut.robotex.robot.ramses;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
@@ -16,6 +17,7 @@ import ee.ut.robotex.robot.components.Dribbler;
 import ee.ut.robotex.robot.components.Wheel;
 import ee.ut.robotex.robot.sensors.Camera;
 import ee.ut.robotex.simulation.GameInfo;
+import ee.ut.robotex.simulation.Simulation;
 import ee.ut.robotex.simulation.StepListener;
 
 public class Ramses extends Robot {
@@ -32,8 +34,8 @@ public class Ramses extends Robot {
 	private float sideWidth = 0.27f;
 	private float wheelOffset = 0.06f;
 	private float cameraOffset = 0.1f;
-	private float cameraAOV = 120.0f;
-	private float cameraDistance = 8.5f;
+	private float cameraAOV = 60.0f;
+	private float cameraDistance = 5.5f;
 	private float coilgunOffset = -0.18f;
 	private float coilgunWidth = 0.18f;
 	private float coilgunRange = 0.04f;
@@ -46,13 +48,14 @@ public class Ramses extends Robot {
 	private float maxEngineTorque = 2.0f;
 	private float wheelRadius = 0.02f;
 	private float lateralGrip = 50.0f;
-	//private float dribblerDepth = 0.02f;
 	private float heading = 0.0f;
 	private float power = 0.0f;
 	private float yawRate = 0.0f;
+	private float guessedAngleToGoal = 0.0f;
+	private float yawRateGuessedAngleMultiplier = 200.0f;
 
-	public Ramses(World world, GameInfo game) {
-		super(world, game);
+	public Ramses(World world, GameInfo game, Simulation.Side side) {
+		super(world, game, side);
 	}
 	
 	@Override
@@ -82,6 +85,32 @@ public class Ramses extends Robot {
 		return radius;
 	}
 	
+	public Camera getCamera() {
+		return camera;
+	}
+	
+	public Coilgun getCoilGun() {
+		return coilgun;
+	}
+	
+	public Dribbler getDribbler() {
+		return dribbler;
+	}
+	
+	public void setGuessedAngleToGoal(float angle) {
+		guessedAngleToGoal = angle;
+		
+		if (guessedAngleToGoal < -180.0f) {
+			guessedAngleToGoal += 360.0f;
+		} else if (guessedAngleToGoal > 180.0f) {
+			guessedAngleToGoal -= 360.0f;
+		}
+	}
+	
+	public float getGuessedAngleToGoal() {
+		return guessedAngleToGoal;
+	}
+	
 	@Override
 	public void paint(Graphics2D g) {
 		// heading
@@ -94,20 +123,31 @@ public class Ramses extends Robot {
 		g.setColor(new Color(200, 200, 200));
 		g.fill(getOutline());
 		
-		for (Paintable wheel : wheels) {
-			Graphics2D g2 = (Graphics2D)g.create();
-			
-			wheel.paint(g2);
+		Graphics2D g2 = (Graphics2D)g.create();
+		g2.setStroke(new BasicStroke(0.02f));
+		
+		if (side == Simulation.Side.YELLOW) {
+			g2.setColor(new Color(220, 220, 0, 128));
+		} else {
+			g2.setColor(new Color(0, 0, 220, 128));
 		}
 		
-		Graphics2D g2 = (Graphics2D)g.create();
-		camera.paint(g2);
+		g2.draw(getOutline());
+
+		for (Paintable wheel : wheels) {
+			Graphics2D g3 = (Graphics2D)g.create();
+			
+			wheel.paint(g3);
+		}
 		
-		g2 = (Graphics2D)g.create();
-		coilgun.paint(g2);
+		Graphics2D g4 = (Graphics2D)g.create();
+		camera.paint(g4);
 		
-		g2 = (Graphics2D)g.create();
-		dribbler.paint(g2);
+		g4 = (Graphics2D)g.create();
+		coilgun.paint(g4);
+		
+		g4 = (Graphics2D)g.create();
+		dribbler.paint(g4);
 	}
 
 	@Override
@@ -124,6 +164,7 @@ public class Ramses extends Robot {
 			
 			// dribbler
 			// can't really do I guess, creates concave polygons
+			// float dribblerDepth = 0.02f;
 			//outline.addPoint(-radius + edgeWidth + dribblerDepth, -radius + dribblerDepth);
 			//outline.addPoint(radius - edgeWidth - dribblerDepth, -radius + dribblerDepth);
 			
@@ -158,6 +199,8 @@ public class Ramses extends Robot {
 		camera.stepBeforePhysics(dt);
 		coilgun.stepBeforePhysics(dt);
 		dribbler.stepBeforePhysics(dt);
+		
+		guessedAngleToGoal -= yawRate * yawRateGuessedAngleMultiplier * dt;
 	}
 
 	public void setHeading(float heading) {

@@ -16,7 +16,7 @@ import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.contacts.Contact;
 
 import ee.ut.robotex.robot.Robot;
-import ee.ut.robotex.robot.ramses.Ramses;
+import ee.ut.robotex.robot.RobotController;
 import ee.ut.robotex.util.FpsCounter;
 import ee.ut.robotex.util.Util;
 
@@ -25,6 +25,7 @@ public class Simulation implements Runnable, GameInfo, StepListener, ContactList
 	private World world;
 	private List<Ball> balls;
 	private List<StepListener> stepListeners;
+	private List<RobotController> robotControllers;
 	private Robot blueRobot;
 	private Robot yellowRobot;
 	private Goal blueGoal;
@@ -51,6 +52,7 @@ public class Simulation implements Runnable, GameInfo, StepListener, ContactList
 		fpsCounter = new FpsCounter(100, (int)targetFps);
 		balls = new ArrayList<Ball>();
 		stepListeners = new ArrayList<StepListener>();
+		robotControllers = new ArrayList<RobotController>();
 		
 		stepListeners.add(this);
 		
@@ -68,37 +70,10 @@ public class Simulation implements Runnable, GameInfo, StepListener, ContactList
 		createWalls();
 		createGoals();
 		createBalls(11);
-		createRobots();
-		
-		/*
-		// create ground
-		BodyDef groundBodyDef = new BodyDef();
-		groundBodyDef.position.set(new Vec2(2.0f, 1.0f));
-		Body ground = world.createBody(groundBodyDef);
-		
-        PolygonShape groundShapeDef = new PolygonShape();
-        groundShapeDef.setAsBox(1.5f, 0.1f, new Vec2(0.0f, 0.0f), 5 * (float)Math.PI / 180.0f);
-        ground.createFixture(groundShapeDef, 0.0f);
-        
-        ground.getFixtureList().setRestitution(0.5f);
-        
-        bodies.put("body", ground);
-        
-        // create circle
-        CircleShape circleShape = new CircleShape();
-        circleShape.m_radius = 0.1f;
-		
-		BodyDef circleBodyDef = new BodyDef();
-		circleBodyDef.type = BodyType.DYNAMIC;
-		circleBodyDef.position.set(2.0f, 3.0f);
-		
-		Body circle = world.createBody(circleBodyDef);
-		circle.createFixture(circleShape, 10.0f);
-		
-		circle.getFixtureList().setRestitution(0.5f);
-		
-		bodies.put("circle", circle);
-		*/
+	}
+	
+	public World getWorld() {
+		return world;
 	}
 	
 	public List<Body> getBodies() {
@@ -162,6 +137,15 @@ public class Simulation implements Runnable, GameInfo, StepListener, ContactList
 	public void addStepListener(StepListener listener) {
 		stepListeners.add(listener);
 	}
+	
+	public void addRobotController(RobotController controller) {
+		robotControllers.add(controller);
+		stepListeners.add(controller);
+	}
+	
+	public List<RobotController> getRobotControllers() {
+		return robotControllers;
+	}
 
 	public int getFps() {
 		if (this.timewarp == 0) {
@@ -199,26 +183,9 @@ public class Simulation implements Runnable, GameInfo, StepListener, ContactList
 		return yellowGoal.getBallCount();
 	}
 	
-	private void createBalls(int count) {
-		float margin = 0.2f;
+	public void setYellowRobot(Robot robot) {
+		yellowRobot = robot;
 		
-		for (int i = 0; i < count; i++) {
-			float x = Util.random(margin, fieldWidth - margin * 2.0f);
-			float y = Util.random(margin, fieldHeight - margin * 2.0f);
-			
-			Ball ball = createBall(x, y);
-			
-			float force = 2.0f;
-			float fx = Util.random(0.0f, force) * timeStep;
-			float fy = Util.random(0.0f, force) * timeStep;
-			
-			ball.getBody().applyLinearImpulse(new Vec2(fx, fy), new Vec2(0, 0));
-		}
-	}
-	
-	private void createRobots() {
-		yellowRobot = new Ramses(world, this);
-
 		stepListeners.add(yellowRobot);
 		
 		yellowRobot.init();
@@ -226,6 +193,48 @@ public class Simulation implements Runnable, GameInfo, StepListener, ContactList
 			new Vec2(yellowRobot.getRadius(), yellowRobot.getRadius()),
 			90.0f / 180.0f * (float)Math.PI
 		);
+	}
+	
+	public void setBlueRobot(Robot robot) {
+		blueRobot = robot;
+		
+		stepListeners.add(blueRobot);
+		
+		blueRobot.init();
+		blueRobot.getBody().setTransform(
+			new Vec2(fieldWidth - blueRobot.getRadius(), fieldHeight - blueRobot.getRadius()),
+			-90.0f / 180.0f * (float)Math.PI
+		);
+	}
+	
+	private void createBalls(int count) {
+		float margin = 0.2f;
+		
+		for (int i = 0; i < Math.floor(count / 2.0f); i++) {
+			float x = Util.random(margin, fieldWidth / 2.0f - margin);
+			float y = Util.random(margin, fieldHeight - margin * 2.0f);
+			
+			createBall(x, y);
+			createBall(fieldWidth - x, fieldHeight - y);
+			
+			/*
+			Ball ball = createBall(x, y);
+			
+			float force = 2.0f;
+			float fx = Util.random(0.0f, force) * timeStep;
+			float fy = Util.random(0.0f, force) * timeStep;
+			
+			ball.getBody().applyLinearImpulse(new Vec2(fx, fy), new Vec2(0, 0));
+			*/
+		}
+		
+		if (count % 2 != 0) {
+			// odd number of balls, create one in the center
+			float x = fieldWidth / 2.0f;
+			float y = fieldHeight / 2.0f;
+			
+			createBall(x, y);
+		}
 	}
 	
 	private Ball createBall(float x, float y) {
@@ -269,8 +278,8 @@ public class Simulation implements Runnable, GameInfo, StepListener, ContactList
 	}
 	
 	private void createGoals() {
-		blueGoal = createGoal(Side.BLUE, -goalDepth / 2.0f, fieldHeight / 2.0f, goalWidth, goalDepth, 0.0f);
-		yellowGoal = createGoal(Side.YELLOW, fieldWidth + goalDepth / 2.0f, fieldHeight / 2.0f, goalWidth, goalDepth, 0.0f);
+		blueGoal = createGoal(Side.BLUE, -goalDepth / 2.0f - wallDepth, fieldHeight / 2.0f, goalWidth, goalDepth, 0.0f);
+		yellowGoal = createGoal(Side.YELLOW, fieldWidth + goalDepth / 2.0f + wallDepth, fieldHeight / 2.0f, goalWidth, goalDepth, 0.0f);
 	}
 	
 	private Goal createGoal(Side side, float x, float y, float width, float depth, float angle) {
@@ -342,7 +351,7 @@ public class Simulation implements Runnable, GameInfo, StepListener, ContactList
 	public void beginContact(Contact contact) {
 		Score score = resolveScore(contact);
 		
-		if (score != null) {
+		if (score != null && score.ball.isActive()) {
 			System.out.println("Ball #" + score.ball.getId() + " entered " + score.goal.getSide());
 			
 			score.goal.increaseBallCount();
@@ -354,19 +363,16 @@ public class Simulation implements Runnable, GameInfo, StepListener, ContactList
 		Score score = resolveScore(contact);
 		
 		if (score != null) {
-			System.out.println("Ball #" + score.ball.getId() + " exited " + score.goal.getSide());
+			score.ball.deactivate();
+			
 			/*
 			if (score.goal.getSide() == Simulation.Side.BLUE) {
 				Manifold manifold = contact.getManifold();
 				
-				if (manifold.localNormal.x > 0.0f) {
-					System.out.println("  out of blue");
-				} else {
-					System.out.println("  back from blue");
+				if (manifold.localNormal.y <= 0.0f) {
+					score.ball.deactivate();
 				}
 			}
-			
-			//score.goal.decreaseBallCount();
 			*/
 		}
 	}

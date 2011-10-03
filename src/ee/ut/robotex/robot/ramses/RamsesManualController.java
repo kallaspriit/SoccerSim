@@ -1,5 +1,6 @@
 package ee.ut.robotex.robot.ramses;
 
+import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -7,9 +8,9 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import ee.ut.robotex.simulation.StepListener;
+import ee.ut.robotex.robot.RobotController;
 
-public class RamsesManualController implements KeyListener, MouseListener, StepListener {
+public class RamsesManualController extends RobotController implements KeyListener, MouseListener {
 	private Ramses ramses;
 	private float xPower = 0.0f;
 	private float yPower = 0.0f;
@@ -24,6 +25,10 @@ public class RamsesManualController implements KeyListener, MouseListener, StepL
 		this.ramses = ramses;
 		
 		keysPressed = new ArrayList<Integer>();
+	}
+	
+	public String getName() {
+		return "Keyboard Ramses Controller";
 	}
 	
 	protected boolean isKeyPressed(int keyCode) {
@@ -184,6 +189,12 @@ public class RamsesManualController implements KeyListener, MouseListener, StepL
 
 	@Override
 	public void stepAfterPhysics(float dt) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void paint(Graphics2D g) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -22,6 +22,7 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.Fixture;
 
+import ee.ut.robotex.robot.RobotController;
 import ee.ut.robotex.simulation.Simulation;
 
 public class Renderer implements ImageObserver {
@@ -34,7 +35,7 @@ public class Renderer implements ImageObserver {
     float xMargin = 0.0f;
     float yMargin = 0.0f;
     private BufferedImage background;
-    boolean showPhysics = true;
+    boolean showPhysics = false;
 	
 	public Renderer(Simulation simulation) {
 		this.simulation = simulation;
@@ -124,6 +125,14 @@ public class Renderer implements ImageObserver {
 			
 			lastWidth = width;
 			lastHeight = height;
+		}
+		
+		List<RobotController> robotControllers = simulation.getRobotControllers();
+		
+		for (RobotController controller : robotControllers) {
+			Graphics2D g2 = (Graphics2D)g.create();
+			
+			controller.paint(g2);
 		}
 		
 		float goalWidth = simulation.getGoalWidth();

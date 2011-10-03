@@ -5,9 +5,10 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jbox2d.common.MathUtils;
@@ -33,16 +34,25 @@ public class Camera implements StepListener, Paintable {
 	protected Polygon2D view;
 	protected List<BallInfo> visibleBalls;
 	protected List<GoalInfo> visibleGoals;
+	protected int lastVirtualId = 0;
 	
 	public class BallInfo {
-		private int id;
+		private int realId;
+		public int id;
 		public float distance;
 		public float angle;
 		
-		public BallInfo(int id,float distance, float angle) {
-			this.id = id;
+		public BallInfo(int realId, int virtualId, float distance, float angle) {
+			this.realId = realId;
+			this.id = virtualId;
 			this.distance = distance;
 			this.angle = angle;
+		}
+		
+		// AI should not use this as the camera can't uniquely determine
+		// which ball is which, for debugging only
+		public int _getRealId() {
+			return realId;
 		}
 	}
 	
@@ -90,6 +100,14 @@ public class Camera implements StepListener, Paintable {
 			distance * (float)Math.sin((angleOfView / 2.0f + angle - 90.0f) * Math.PI / 180.0f)
 		);
 	}
+	
+	public List<BallInfo> getVisibleBalls() {
+		return visibleBalls;
+	}
+	
+	public List<GoalInfo> getVisibleGoals() {
+		return visibleGoals;
+	}
 
 	@Override
 	public void paint(Graphics2D g) {
@@ -110,7 +128,7 @@ public class Camera implements StepListener, Paintable {
 		g3.translate(-body.getPosition().x, -body.getPosition().y);
 		
 		for (BallInfo ballInfo : visibleBalls) {
-			Ball ball = game.getBallById(ballInfo.id);
+			Ball ball = game.getBallById(ballInfo.realId);
 			
 			float radius = 0.075f;
 			
@@ -120,7 +138,7 @@ public class Camera implements StepListener, Paintable {
 			g3.setFont((new Font("Consolas", Font.PLAIN, 1)).deriveFont(0.1f));
 			g3.setColor(new Color(255, 255, 255));
 			g3.drawString(
-				Long.toString(Math.round(ballInfo.distance * 100.0f)) + "cm / " + Long.toString(Math.round(ballInfo.angle / Math.PI * 180.0f)) + "°",
+				"#" + Integer.toString(ballInfo.id) + " - " + Long.toString(Math.round(ballInfo.distance * 100.0f)) + "cm / " + Long.toString(Math.round(ballInfo.angle / Math.PI * 180.0f)) + "°",
 				ball.getX(),
 				ball.getY() - 0.1f
 			);
@@ -134,11 +152,13 @@ public class Camera implements StepListener, Paintable {
 				goal = game.getBlueGoal();
 			}
 			
+			/*
 			float width = 0.33f;
 			float height = 0.78f;
 			
 			g3.setColor(new Color(255, 255, 255, 100));
 			g3.fill(new Rectangle2D.Float(goal.getBody().getPosition().x - width / 2.0f, goal.getBody().getPosition().y - height / 2.0f, width, height));
+			*/
 			
 			g3.setFont((new Font("Consolas", Font.PLAIN, 1)).deriveFont(0.1f));
 			g3.setColor(new Color(255, 255, 255));
@@ -152,6 +172,12 @@ public class Camera implements StepListener, Paintable {
 
 	@Override
 	public void stepBeforePhysics(float dt) {
+		Map<Integer, Integer> lastIds = new HashMap<Integer, Integer>();
+		
+		for (BallInfo ball : visibleBalls) {
+			lastIds.put(ball.realId, ball.id);
+		}
+		
 		visibleBalls.clear();
 		visibleGoals.clear();
 		
@@ -167,6 +193,11 @@ public class Camera implements StepListener, Paintable {
 		}
 		
 		for (Ball ball : game.getBalls()) {
+			// ignore inactive balls
+			if (!ball.isActive()) {
+				continue;
+			}
+			
 			if (globalView.contains(ball.getX(), ball.getY())) {
 				Vec2 ballPos = new Vec2(ball.getX(), ball.getY());
 				Vec2 cameraPos = body.getWorldPoint(new Vec2(x, y));
@@ -179,7 +210,15 @@ public class Camera implements StepListener, Paintable {
 				float distance = MathUtils.distance(ballPos, cameraPos);
 				float angle = Vec2.dot(ballHeading, forwardVec);
 				
-				visibleBalls.add(new BallInfo(ball.getId(), distance, angle));
+				int virtualId;
+				
+				if (lastIds.containsKey(ball.getId())) {
+					virtualId = lastIds.get(ball.getId());
+				} else {
+					virtualId = lastVirtualId++;
+				}
+				
+				visibleBalls.add(new BallInfo(ball.getId(), virtualId, distance, angle));
 			}
 		}
 		

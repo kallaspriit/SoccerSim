@@ -14,6 +14,7 @@ import javax.swing.event.ChangeListener;
 import ee.ut.robotex.renderer.RenderPanel;
 import ee.ut.robotex.renderer.Renderer;
 import ee.ut.robotex.robot.ramses.Ramses;
+import ee.ut.robotex.robot.ramses.RamsesAI;
 import ee.ut.robotex.robot.ramses.RamsesManualController;
 import ee.ut.robotex.simulation.Simulation;
 
@@ -33,27 +34,38 @@ public class Gui extends JFrame implements ChangeListener {
 		setupLookAndFeel();
 		setupMainLayout();
 		setupBottomPanel();
-		setupController(simulation);
+		setupRobots();
 		
 		setVisible(true);
 		
 		new Thread(renderPanel).start();
+		new Thread(simulation).start(); 
 	}
 
-	private void setupController(Simulation simulation) {
+	private void setupRobots() {
 		// enable controlling ramses manually
-		Ramses ramses = (Ramses)simulation.getYellowRobot();
+		Ramses ramses1 = new Ramses(simulation.getWorld(), simulation, Simulation.Side.BLUE);
+		Ramses ramses2 = new Ramses(simulation.getWorld(), simulation, Simulation.Side.YELLOW);
 		
-		RamsesManualController ramsesController = new RamsesManualController(ramses);
+		simulation.setYellowRobot(ramses1);
+		simulation.setBlueRobot(ramses2);
 		
-		addKeyListener(ramsesController);
-		addMouseListener(ramsesController);
-		simulation.addStepListener(ramsesController);
+		RamsesManualController ramsesManualController = new RamsesManualController(ramses1);
+		simulation.addRobotController(ramsesManualController);
+		addKeyListener(ramsesManualController);
+		addMouseListener(ramsesManualController);
+		
+		//RamsesAI ramsesComputerController1 = new RamsesAI(ramses1);
+		//simulation.addRobotController(ramsesComputerController1);
+		
+		RamsesAI ramsesComputerController2 = new RamsesAI(ramses2);
+		simulation.addRobotController(ramsesComputerController2);
 	}
 
 	private void setupBottomPanel() {
 		JPanel bottomPanel = new JPanel();
-		bottomPanel.setLayout(new GridLayout(0, 2));
+		//bottomPanel.setLayout(new GridLayout(0, 2));
+		bottomPanel.setLayout(new GridLayout(0, 1));
 		
 		timewarpSlider = new JSlider(JSlider.HORIZONTAL, 0, 1000, 100);
 	    timewarpSlider.setBorder(BorderFactory.createTitledBorder("Simulation speed %"));

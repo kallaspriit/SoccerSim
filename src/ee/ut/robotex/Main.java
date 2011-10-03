@@ -13,7 +13,5 @@ public class Main {
 		Simulation simulation = new Simulation();
 		Renderer renderer = new Renderer(simulation);
 		new Gui(renderer, simulation);
-		
-		new Thread(simulation).start(); 
 	}
 }

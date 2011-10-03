@@ -66,7 +66,7 @@ public class Coilgun implements StepListener, Paintable {
 		float height = 0.1f;
 		
 		g.setColor(new Color(100, 100, 100));
-		g.fill(new Rectangle2D.Float(-width / 2.0f, height / 2.0f, width, height));
+		g.fill(new Rectangle2D.Float(-width / 2.0f, 0, width, height));
 		
 		g.setColor(new Color(255, 0, 0, 128));
 		g.fill(area);
@@ -88,7 +88,7 @@ public class Coilgun implements StepListener, Paintable {
 		
 		for (Ball ball : game.getBalls()) {
 			if (globalView.contains(ball.getX(), ball.getY())) {
-				System.out.println("Coilgun sees #" + ball.getId());
+				//System.out.println("Coilgun sees #" + ball.getId());
 				
 				if (kick) {
 					Vec2 kickForce = new Vec2(strength * dt * (float)Math.cos(body.getAngle() - 90.0f * Math.PI / 180.0f), strength * dt * (float)Math.sin(body.getAngle() - 90.0f * Math.PI / 180.0f));

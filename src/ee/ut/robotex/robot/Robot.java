@@ -25,13 +25,22 @@ public abstract class Robot implements Paintable, StepListener {
 	protected Body body;
 	protected GameInfo game;
 	
-	public Robot(World world, GameInfo game) {
+	public Robot(World world, GameInfo game, Simulation.Side side) {
 		this.world = world;
 		this.game = game;
+		this.side = side;
 	}
 	
 	public Body getBody() {
 		return body;
+	}
+	
+	public GameInfo getGameInfo() {
+		return game;
+	}
+	
+	public Simulation.Side getSide() {
+		return side;
 	}
 	
 	public void init() {
