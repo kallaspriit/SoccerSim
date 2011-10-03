@@ -22,6 +22,8 @@ public class Wheel implements StepListener, Paintable {
 	protected Vec2 localVelocity;
 	protected float lateralVelocity;
 	protected float lateralGrip;
+	protected float wheelRadius;
+	public float depth;	// XXX: Hack to avoid breaking interfaces
 	
 	public Wheel(Body body, float x, float y, float angle, float maxTorque, float wheelRadius, float lateralGrip) {
 		this.body = body;
@@ -29,9 +31,11 @@ public class Wheel implements StepListener, Paintable {
 		this.y = y;
 		this.angle = angle;
 		this.maxForce = maxTorque / wheelRadius;
+		this.wheelRadius = wheelRadius;
 		this.lateralGrip = lateralGrip;
 		this.velocity = new Vec2(0.0f, 0.0f);
 		this.localVelocity = new Vec2(0.0f, 0.0f);
+		this.depth = 0.05f;
 	}
 	
 	public void setPower(float power) {
@@ -72,8 +76,7 @@ public class Wheel implements StepListener, Paintable {
 		g.rotate(angle * Math.PI / 180.0f);
 		g.setColor(new Color(100, 100, 100));
 		
-		float width = 0.1f;
-		float depth = 0.05f;
+		float width = 2*this.wheelRadius; // 0.1f;
 		
 		g.fill(new Rectangle2D.Float(-width / 2.0f, -depth / 2.0f, width, depth));
 		
