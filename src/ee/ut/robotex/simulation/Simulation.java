@@ -60,7 +60,7 @@ public class Simulation implements Runnable, GameInfo, StepListener, ContactList
 		Settings.velocityThreshold = 0.01f;
 		
 		// increase this if your robot has even more sides
-		Settings.maxPolygonVertices = 16;
+		Settings.maxPolygonVertices = 22;
 		
 		//Vec2 gravity = new Vec2(0, -9.8f);
 		Vec2 gravity = new Vec2(0.0f, 0.0f);
