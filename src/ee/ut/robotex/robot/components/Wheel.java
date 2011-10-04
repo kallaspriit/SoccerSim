@@ -114,10 +114,10 @@ public class Wheel implements StepListener, Paintable {
 		
 		float combinedAngle = (angle * (float)Math.PI / 180.0f) + body.getAngle();
 		
-		float longitudinalForceX = getLongitudinalForce() * (float)Math.cos(combinedAngle) * dt;
-		float longitudinalForceY = getLongitudinalForce() * (float)Math.sin(combinedAngle) * dt;
-		float lateralForceX = getLateralForce() * (float)Math.cos(combinedAngle + Math.PI / 2.0f) * dt;
-		float lateralForceY = getLateralForce() * (float)Math.sin(combinedAngle + Math.PI / 2.0f) * dt;
+		float longitudinalForceX = getLongitudinalForce() * (float)Math.cos(combinedAngle);
+		float longitudinalForceY = getLongitudinalForce() * (float)Math.sin(combinedAngle);
+		float lateralForceX = getLateralForce() * (float)Math.cos(combinedAngle + Math.PI / 2.0f);
+		float lateralForceY = getLateralForce() * (float)Math.sin(combinedAngle + Math.PI / 2.0f);
 		
 		// add force offset from center of body
 		Vec2 longitudinalForceVec = new Vec2(longitudinalForceX, longitudinalForceY);

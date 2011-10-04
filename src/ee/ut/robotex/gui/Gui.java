@@ -47,18 +47,19 @@ public class Gui extends JFrame implements ChangeListener {
 		Ramses ramses1 = new Ramses(simulation.getWorld(), simulation, Simulation.Side.BLUE);
 		//Ramses ramses2 = new Ramses(simulation.getWorld(), simulation, Simulation.Side.YELLOW);
 		ee.ut.robotex.robot.telliskivi.Robot telliskivi = new ee.ut.robotex.robot.telliskivi.Robot(simulation.getWorld(), simulation, Simulation.Side.YELLOW);
-		ee.ut.robotex.robot.telliskivi.NetController telliskiviController = new ee.ut.robotex.robot.telliskivi.NetController(telliskivi, 5001);
+		
+		new ee.ut.robotex.robot.telliskivi.NetController(telliskivi, 5001);
 		
 		simulation.setYellowRobot(ramses1);
 		simulation.setBlueRobot(telliskivi);
-		/*
+		
 		RamsesManualController ramsesManualController = new RamsesManualController(ramses1);
 		simulation.addRobotController(ramsesManualController);
 		addKeyListener(ramsesManualController);
 		addMouseListener(ramsesManualController);
-		*/
-		RamsesAI ramsesComputerController1 = new RamsesAI(ramses1);
-		simulation.addRobotController(ramsesComputerController1);
+		
+		//RamsesAI ramsesComputerController1 = new RamsesAI(ramses1);
+		//simulation.addRobotController(ramsesComputerController1);
 		
 		//RamsesAI ramsesComputerController2 = new RamsesAI(ramses2);
 		//simulation.addRobotController(ramsesComputerController2);

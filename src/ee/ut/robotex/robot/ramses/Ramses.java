@@ -45,9 +45,9 @@ public class Ramses extends Robot {
 	private float dribblerRange = 0.04f;
 	private float dribblerStrength = 0.3f;
 	private float radius = (edgeWidth + sideWidth) / 2.0f;
-	private float maxEngineTorque = 2.0f;
+	private float maxEngineTorque = 0.03f; // 30mNm
 	private float wheelRadius = 0.02f;
-	private float lateralGrip = 50.0f;
+	private float lateralGrip = 0.5f;
 	private float heading = 0.0f;
 	private float power = 0.0f;
 	private float yawRate = 0.0f;
