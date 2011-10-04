@@ -17,6 +17,7 @@ import org.jbox2d.dynamics.Body;
 
 import ee.ut.robotex.renderer.Paintable;
 import ee.ut.robotex.renderer.Polygon2D;
+import ee.ut.robotex.robot.Robot;
 import ee.ut.robotex.simulation.Ball;
 import ee.ut.robotex.simulation.GameInfo;
 import ee.ut.robotex.simulation.Goal;
@@ -132,7 +133,14 @@ public class Camera implements StepListener, Paintable {
 			
 			float radius = 0.075f;
 			
-			g3.setColor(new Color(255, 255, 255, 100));
+			Robot robot = (Robot)body.getUserData();
+			
+			if (robot.getSide() == Simulation.Side.YELLOW) {
+				g3.setColor(new Color(255, 255, 0, 50));
+			} else {
+				g3.setColor(new Color(0, 0, 255, 50));
+			}
+			
 			g3.fill(new Ellipse2D.Float(ball.getX() - radius, ball.getY() - radius, radius * 2.0f, radius * 2.0f));
 			
 			g3.setFont((new Font("Consolas", Font.PLAIN, 1)).deriveFont(0.1f));

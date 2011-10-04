@@ -39,11 +39,11 @@ public class Ramses extends Robot {
 	private float coilgunOffset = -0.18f;
 	private float coilgunWidth = 0.18f;
 	private float coilgunRange = 0.04f;
-	private float coilgunStrength = 40.0f;
+	private float coilgunStrength = 10.0f;
 	private float dribblerOffset = -0.18f;
 	private float dribblerWidth = 0.18f;
 	private float dribblerRange = 0.04f;
-	private float dribblerStrength = 3.0f;
+	private float dribblerStrength = 0.3f;
 	private float radius = (edgeWidth + sideWidth) / 2.0f;
 	private float maxEngineTorque = 2.0f;
 	private float wheelRadius = 0.02f;

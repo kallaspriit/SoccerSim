@@ -24,7 +24,10 @@ public class Coilgun implements StepListener, Paintable {
 	private float range;
 	private float strength = 1.0f;
 	private boolean kick = false;
-	protected Polygon2D area;
+	private Polygon2D area;
+	private float duration = 0.0f;
+	private float kickDelay = 0.1f;
+	private float lastKickTime = 0.0f;
 	
 	public Coilgun(Body body, GameInfo game, float x, float y, float angle, float width, float range) {
 		this.body = body;
@@ -74,6 +77,8 @@ public class Coilgun implements StepListener, Paintable {
 
 	@Override
 	public void stepBeforePhysics(float dt) {
+		duration += dt;
+		
 		Polygon2D globalView = new Polygon2D();
 		float ballRadius = game.getBalls().get(0).getRadius();
 		
@@ -90,9 +95,13 @@ public class Coilgun implements StepListener, Paintable {
 			if (globalView.contains(ball.getX(), ball.getY())) {
 				//System.out.println("Coilgun sees #" + ball.getId());
 				
-				if (kick) {
+				// make sure we dont apply the impulse several times
+				if (kick && duration - lastKickTime >= kickDelay) {
 					Vec2 kickForce = new Vec2(strength * dt * (float)Math.cos(body.getAngle() - 90.0f * Math.PI / 180.0f), strength * dt * (float)Math.sin(body.getAngle() - 90.0f * Math.PI / 180.0f));
-					ball.getBody().applyForce(kickForce, ball.getBody().getPosition());
+					//ball.getBody().applyForce(kickForce, ball.getBody().getPosition());
+					ball.getBody().applyLinearImpulse(kickForce, ball.getBody().getPosition());
+				
+					lastKickTime = duration;
 				}
 			}
 		}

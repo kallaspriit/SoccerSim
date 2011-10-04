@@ -99,9 +99,10 @@ public class Dribbler implements StepListener, Paintable {
 					// this approach tries to keep the ball centered at dribbler
 					Vec2 dribblerForce = new Vec2(ball.getX() - globalPos.x, ball.getY() - globalPos.y);
 					dribblerForce.normalize();
-					dribblerForce.mulLocal(-strength * dt);
+					dribblerForce.mulLocal(-strength);
 					
 					ball.getBody().applyForce(dribblerForce, ball.getBody().getPosition());
+					body.applyForce(dribblerForce.mul(-1.0f), body.getPosition());
 				}
 				
 				gotBall = true;
